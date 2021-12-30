@@ -9,12 +9,9 @@ import ldb
 
 global file_name
 global ldb_list
-global res_lst_tickt
+global res_lst_ticket
 global function_counter
-
-file_name = 'Lotto.csv'                                                     # The file containing lotto results
-ldb_list = []                                                               # list of the DB
-function_counter = 0                                                        # How many functions selected
+global root
 
 
 def tests():
@@ -161,7 +158,7 @@ def couples():
 def wining_dates():
     """
     function getting the best date to fill ticket
-    :return: DO TO
+    :return: TODO: BILL wining_dates
     """
     wining_list = []
     # Add only wining from DB
@@ -174,7 +171,7 @@ def wining_dates():
 
 def chain_num():
     """
-    download csv from loto website
+    download csv from lotto website
     :return: List the 6 number & extra (7 numbers in total)
     """
     num_list_counter = np.zeros((38,), dtype=int)   # number of shows in a row
@@ -449,19 +446,20 @@ def ticket_top():
         btn_grph_list[row].configure(width=5, activebackground="green", relief=FLAT)
         # # btn_win_list.append(my_canvas.create_window(320, y1_start + (row * 40), anchor=NW, window=btn_grph_list[row]))
         # my_canvas.create_window(320, y1_start + (row * 40), anchor=NW, window=btn_grph_list[row])
-    coun = 0
-    for btn in btn_grph_list:
-        my_canvas.create_window(320, y1_start + (coun * 40), anchor=NW, window=btn)
-        coun += 1
-    # button1 = Button(my_canvas, text="A", command=lambda: graphs(0), anchor=W)
-    # button1.configure(width=5, activebackground="#33B5E5", relief=FLAT)
-    #
-    #
-    # button2 = Button(my_canvas, text="B", command=lambda: graphs(1), anchor=W)
-    # button2.configure(width=5, activebackground="#33B5E5", relief=FLAT)
-    #
-    # my_canvas.create_window(320, 15, anchor=NW, window=button1)
-    # my_canvas.create_window(320, 55, anchor=NW, window=button2)
+
+    # coun = 0
+    # for btn in btn_grph_list:
+    #     my_canvas.create_window(320, y1_start + (coun * 40), anchor=NW, window=btn)
+    #     coun += 1
+
+    button1 = Button(my_canvas, text="A", command=lambda: graphs(0), anchor=W)
+    button1.configure(width=5, activebackground="#33B5E5", relief=FLAT)
+
+    button2 = Button(my_canvas, text="B", command=lambda: graphs(1), anchor=W)
+    button2.configure(width=5, activebackground="#33B5E5", relief=FLAT)
+
+    my_canvas.create_window(320, 15, anchor=NW, window=button1)
+    my_canvas.create_window(320, 55, anchor=NW, window=button2)
 
     my_canvas.pack(padx=5, pady=5)
     Button(top1, text="End", command=root.quit, fg="black", bg='#7CD1B8').pack()
@@ -473,45 +471,54 @@ def gui():
     Main window (GUI), start menu
     :return: none
     """
-    global root
-    global option_download
-    global strongNums
-    global strongNumsOnlyWins
-    global couples
-    global chain_num
     result_list = []
 
-    root = Tk()                                                             # Configure main window
-    root.minsize(400, 400)
+    root.minsize(500, 600)
     root.title("Lotto App")
     root.config(bg='#3E8E7E')
+    Label(root, text="", bg='#3E8E7E').pack()                                           # For space between things
+    big_font = ('Purisa', 15, 'bold italic')
+    frame_font = ('Purisa', 11, 'bold italic')
+    small_font = ('Purisa', 11)
 
     # Configure start menu
     strongNums = IntVar()
-    strongNumsOnlyWins = IntVar()
     couples = IntVar()
     chain_num = IntVar()
+    numsOnlyWins = IntVar()
     option_download = IntVar()
 
     Button(root, text="Start", command=start_button,
-           fg='#041C32', bg='#7CD1B8').pack(anchor=N)                                   # Start button, create ticket
+           fg='#041C32', bg='#7CD1B8', font=big_font).pack(anchor=N)                    # Start button, create ticket
+    Label(root, text="", bg='#3E8E7E').pack()                                           # For space between things
 
-    Checkbutton(root, text="option download", variable=option_download, onvalue=1, offvalue=0,
-                activebackground="#3E8E7E", bg='#3E8E7E', fg='black').pack()
+    frame = LabelFrame(root, padx=5, pady=0, bg='#3E8E7E',)
+    frame.pack(anchor=NW)
+    Label(frame, text="Functions to create lotto ticket                                        "       
+                      "                                                                        ",
+          bg='#3E8E7E').pack(anchor=NW)                                                 # Set the size of the frame
+    Label(frame, text="", bg='#3E8E7E').pack()                                           # For space between things
+    Checkbutton(frame, text="Numbers with most appearance in lottery", variable=strongNums, onvalue=1, offvalue=0,
+                bg='#3E8E7E', activebackground="#3E8E7E", font=frame_font).pack(anchor=NW)
+    Checkbutton(frame, text="Numbers with most appearance in lottery (Only wining tickets)", variable=numsOnlyWins,
+                onvalue=1, offvalue=0, activebackground="#3E8E7E", bg='#3E8E7E', font=frame_font).pack(anchor=NW)
+    Checkbutton(frame, text="Two numbers with the most shows together", variable=couples, onvalue=1, offvalue=0,
+                bg='#3E8E7E', activebackground="#3E8E7E", font=frame_font).pack(anchor=NW)
+    Checkbutton(frame, text="Numbers appearance in lottery sequence", variable=chain_num, onvalue=1, offvalue=0,
+                bg='#3E8E7E', activebackground="#3E8E7E", font=frame_font).pack(anchor=NW)
+    Checkbutton(frame, text="Random built by numbers with most appearance", variable=randomByStrongNum,
+                onvalue=1, offvalue=0, bg='#3E8E7E', activebackground="#3E8E7E", font=frame_font).pack(anchor=NW)
+    Checkbutton(frame, text="Random numbers, add favorite numbers", activebackground="#3E8E7E",
+                variable=randomByStrongNum, onvalue=1, offvalue=0, bg='#3E8E7E', font=frame_font).pack(anchor=NW)
+    # TODO: place to write numbers (box)
+    Label(frame, text="", bg='#3E8E7E').pack()                                          # For space between things
 
-    frame = LabelFrame(root, text="Functions", padx=10, pady=30, bg='#3E8E7E')
-    frame.pack(padx=10, pady=10)
-
-    Checkbutton(frame, text="strongNums", variable=strongNums, onvalue=1, offvalue=0,
-                bg='#3E8E7E', fg='black').pack(anchor=NW)
-    Checkbutton(frame, text="strongNumsOnlyWins", variable=strongNumsOnlyWins, onvalue=1, offvalue=0,
-                bg='#3E8E7E', fg='black').pack(anchor=NW)
-    Checkbutton(frame, text="couples", variable=couples, onvalue=1, offvalue=0,
-                bg='#3E8E7E', fg='black').pack(anchor=NW)
-    Checkbutton(frame, text="chain_num", variable=chain_num, onvalue=1, offvalue=0,
-                bg='#3E8E7E', fg='black').pack(anchor=NW)
-
-    Button(root, text="End", command=root.quit, fg="black", bg='#7CD1B8').pack(anchor=S)    # End button, quit App
+    Label(root, text="", bg='#3E8E7E').pack()                                           # For space between things
+    Checkbutton(root, text="Download your ticket as text file", variable=option_download, onvalue=1,
+                offvalue=0, activebackground="#3E8E7E", bg='#3E8E7E', font=small_font).pack(anchor=W)
+    Label(root, text="", bg='#3E8E7E').pack()                                           # For space between things
+    Button(root, text="End", command=root.quit, fg="black",
+           bg='#7CD1B8', font=big_font).pack(anchor=S)                                  # End button, quit App
 
     root.mainloop()
 
@@ -521,12 +528,15 @@ def main():
     Main
     :return: none
     """
-    print("main")
-    # gui()
-    tests()
+    gui()
+    # tests()
 # submit()
 # submit_ldb()
 
 
 if __name__ == '__main__':          # Press the green button in the gutter to run the script.
+    file_name = 'Lotto.csv'                                                 # The file containing lotto results
+    ldb_list = []                                                           # list of the DB
+    function_counter = 0                                                    # How many functions selected
+    root = Tk()                                                             # Configure main window
     main()
