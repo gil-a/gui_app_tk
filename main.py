@@ -16,10 +16,21 @@ global root
 
 def tests():
     submit_ldb()
+    # print("strongNums")
+    # strongNums()
+    #
+    # print("strongNumsOnlyWins")
+    # strongNumsOnlyWins()
+
+    print("couples")
+    couples()
+
+    # print("chain_num")
+    # chain_num()
     # strongNumsOnlyWins()
     # couples()
     # chain_num()
-    wining_dates()
+    # wining_dates()
 
 
     # counter = 0
@@ -46,8 +57,6 @@ def tests():
     # print(winer_counter)
 
 
-
-
 def strongNums():
     """
     function getting the best numbers
@@ -61,30 +70,23 @@ def strongNums():
             num_list[num] += 1
         if item.x_num < 8:
             st_num_list[item.x_num] += 1
-        else:
-            print(item.lotto_num)
-    # print(num_list)
 
     # part2 - making result list
     max_strong_index = list(st_num_list).index(max(st_num_list))            # Getting strong num
-    print(max_strong_index)
 
     result_list = np.zeros((6,), dtype=int)
     result_list_i = np.zeros((6,), dtype=int)
-    for i in range(0,6):                                                    # Getting 6 number
+    for i in range(0, 6):                                                    # Getting 6 number
         result_list[i] = max(num_list)
         result_list_i[i] = list(num_list).index(result_list[i])
         num_list[result_list_i[i]] = 0
 
-    for i in range(0,6):
+    for i in range(0, 6):
         num_list[result_list_i[i]] = result_list[i]
 
-    print(num_list)
-    print(result_list)
-    # Result
-    print(result_list_i)
-    res_list = [1, 2, 3, 4, 5, 6, 7]
-    return res_list
+    res_list = [result_list_i[0], result_list_i[1], result_list_i[2],
+                result_list_i[3], result_list_i[4], result_list_i[5], max_strong_index]
+    return res_list, num_list
 
 
 def strongNumsOnlyWins():
@@ -102,6 +104,8 @@ def strongNumsOnlyWins():
                 st_num_list[item.x_num] += 1
 
     # part2 - making result list
+    max_strong_index = list(st_num_list).index(max(st_num_list))  # Getting strong num
+
     result_list = np.zeros((6,), dtype=int)
     result_list_i = np.zeros((6,), dtype=int)
     for i in range(0, 6):
@@ -112,12 +116,8 @@ def strongNumsOnlyWins():
     for i in range(0, 6):
         num_list[result_list_i[i]] = result_list[i]
 
-    print(num_list)
-    print(result_list)
-
-    print(result_list_i)                                                    # Result
-    res_list = [1, 2, 3, 4, 5, 6, 7]
-    return res_list
+    res_list = [result_list_i[0], result_list_i[1], result_list_i[2], result_list_i[3], result_list_i[4], result_list_i[5], max_strong_index]
+    return res_list, num_list
 
 
 def couples():
@@ -126,33 +126,40 @@ def couples():
     :return: List the 6 number & extra (7 numbers in total)
     """
     num_list = np.zeros((38, 38), dtype=int)
-    st_num_list = np.zeros((8,),dtype=int)
+    st_num_list = np.zeros((8,), dtype=int)
     for item in ldb_list:
         for a in item.six_num_arr:
             for b in item.six_num_arr:
                 if a != b:
                     num_list[int(a)][int(b)] += 1
-        if item.x_num < 8:
-            st_num_list[item.x_num] += 1
-    print(num_list)
-    print(st_num_list)
 
-    # part2 - making result list
-    result_list = np.zeros((6,), dtype=int)
-    result_list_i = np.zeros((6,), dtype=int)
-    # for i in range(0, 6):
-    #     result_list[i] = max(num_list)
-    #     result_list_i[i] = list(num_list).index(result_list[i])
-    #     num_list[result_list_i[i]] = 0
-    #
-    # for i in range(0, 6):
-    #     num_list[result_list_i[i]] = result_list[i]
+    temp_num_list = num_list.copy()
+    max_num_list = []
+    max_index_list = []
+    while len(max_num_list) < 6:
+        max_num = 0
+        row_m = 0
+        cul_m = 0
+        for row in range(0, 38):
+            for cul in range(0, 38):
+                if cul > row:
+                    if temp_num_list[row][cul] > max_num:
+                        max_num = temp_num_list[row][cul]
+                        row_m = row
+                        cul_m = cul
+        max_num_list.append(max_num)
+        max_index_list.append(row_m)
+        max_index_list.append(cul_m)
+        for row in range(0,38):
+            for cul in range(0, 38):
+                if row == row_m or cul == cul_m:
+                    temp_num_list[row][cul] = 0
 
-    print(num_list)
-    print(result_list)
-    print(result_list_i)
+    print(max_num_list)
+    print(max_index_list)
+
     res_list = [1, 2, 3, 4, 5, 6, 7]
-    return res_list
+    return res_list, num_list
 
 
 def wining_dates():
@@ -424,15 +431,15 @@ def ticket_top():
     Label(top1, text="", bg='#146356', fg="white").pack()
     Label(top1, text="Hello and Good Luck!!!",bg='#146356',fg="white").pack()
 
-    my_canvas = Canvas(top1, width=375, height=500, bg='#146356')           # Create the canvas for the ticket
-    my_canvas.create_rectangle(268, 0, 272, 500, fill="black")              # Rectangle that create a black line
+    my_canvas = Canvas(top1, width=375, height=580, bg='#146356')           # Create the canvas for the ticket
+    my_canvas.create_rectangle(268, 0, 272, 580, fill="black")              # Rectangle that create a black line
     x1_start = 30                                                           # Start point for oval (x1,y1,x2,y2)
     y1_start = 15
     x2_start = 60
     y2_start = 45
     btn_grph_list = []
     btn_win_list = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "A1", "A2", "As"]
-    function_counter = 12
+    function_counter = 14
     for row in range(0, function_counter):
         my_canvas.create_text(x1_start - 15, y1_start + 15 + (row * 40), fill="black", font=font, text=row + 1)
         for col in range(0, 6):
@@ -442,8 +449,8 @@ def ticket_top():
         my_canvas.create_oval(250 + x1_start, y1_start + (row * 40), 250 + x2_start, y2_start + (row * 40), fill="red")
         my_canvas.create_text(265 + x1_start, y1_start + 15 + (row * 40), fill="black", font=font, text="6")
         # Graph button
-        btn_grph_list.append(Button(my_canvas, text=btn_win_list[row], command=lambda: graphs(row)))
-        btn_grph_list[row].configure(width=5, activebackground="green", relief=FLAT)
+        # btn_grph_list.append(Button(my_canvas, text=btn_win_list[row], command=lambda: graphs(row)))
+        # btn_grph_list[row].configure(width=5, activebackground="green", relief=FLAT)
         # # btn_win_list.append(my_canvas.create_window(320, y1_start + (row * 40), anchor=NW, window=btn_grph_list[row]))
         # my_canvas.create_window(320, y1_start + (row * 40), anchor=NW, window=btn_grph_list[row])
 
@@ -528,10 +535,10 @@ def main():
     Main
     :return: none
     """
-    gui()
-    # tests()
-# submit()
-# submit_ldb()
+    # gui()
+    tests()
+    # submit()
+    # submit_ldb()
 
 
 if __name__ == '__main__':          # Press the green button in the gutter to run the script.
