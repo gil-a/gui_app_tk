@@ -10,28 +10,22 @@ import ldb
 global file_name
 global ldb_list
 global res_lst_ticket
-global function_counter
+
 global root
+global strongNums
+global couples
+global chain_num
+global numsOnlyWins
+function_counter = 0
 
 
 def tests():
     submit_ldb()
-    # print("strongNums")
-    # strongNums()
-    #
-    # print("strongNumsOnlyWins")
-    # strongNumsOnlyWins()
+    a = [5, 5]
+    randomBySeed(a)
+    graphs()
 
-    print("couples")
-    couples()
-
-    # print("chain_num")
-    # chain_num()
-    # strongNumsOnlyWins()
-    # couples()
-    # chain_num()
     # wining_dates()
-
 
     # counter = 0
     # winer_counter = 0
@@ -72,21 +66,27 @@ def strongNums():
             st_num_list[item.x_num] += 1
 
     # part2 - making result list
-    max_strong_index = list(st_num_list).index(max(st_num_list))            # Getting strong num
+    max_strong_index1 = list(st_num_list).index(max(st_num_list))            # Getting strong num
+    temp_st = st_num_list[max_strong_index1]
+    st_num_list[max_strong_index1] = 0
+    max_strong_index2 = list(st_num_list).index(max(st_num_list))  # Getting strong num
+    st_num_list[max_strong_index1] = temp_st
 
-    result_list = np.zeros((6,), dtype=int)
-    result_list_i = np.zeros((6,), dtype=int)
-    for i in range(0, 6):                                                    # Getting 6 number
+    result_list = np.zeros((12,), dtype=int)
+    result_list_i = np.zeros((12,), dtype=int)
+    for i in range(0, 12):                                                    # Getting 12 number
         result_list[i] = max(num_list)
         result_list_i[i] = list(num_list).index(result_list[i])
         num_list[result_list_i[i]] = 0
 
-    for i in range(0, 6):
+    res_list = []
+    for i in range(0, 12):
         num_list[result_list_i[i]] = result_list[i]
+        res_list.append(result_list_i[i])
+    res_list.append(max_strong_index1)
+    res_list.append(max_strong_index2)
 
-    res_list = [result_list_i[0], result_list_i[1], result_list_i[2],
-                result_list_i[3], result_list_i[4], result_list_i[5], max_strong_index]
-    return res_list, num_list
+    return res_list, num_list, st_num_list
 
 
 def strongNumsOnlyWins():
@@ -104,19 +104,24 @@ def strongNumsOnlyWins():
                 st_num_list[item.x_num] += 1
 
     # part2 - making result list
-    max_strong_index = list(st_num_list).index(max(st_num_list))  # Getting strong num
+    max_strong_index1 = list(st_num_list).index(max(st_num_list))            # Getting strong num
+    st_num_list[max_strong_index1] = 0
+    max_strong_index2 = list(st_num_list).index(max(st_num_list))            # Getting strong num
 
-    result_list = np.zeros((6,), dtype=int)
-    result_list_i = np.zeros((6,), dtype=int)
-    for i in range(0, 6):
+    result_list = np.zeros((12,), dtype=int)
+    result_list_i = np.zeros((12,), dtype=int)
+    for i in range(0, 12):
         result_list[i] = max(num_list)
         result_list_i[i] = list(num_list).index(result_list[i])
         num_list[result_list_i[i]] = 0
 
-    for i in range(0, 6):
+    res_list = []
+    for i in range(0, 12):
         num_list[result_list_i[i]] = result_list[i]
+        res_list.append(result_list_i[i])
+    res_list.append(max_strong_index1)
+    res_list.append(max_strong_index2)
 
-    res_list = [result_list_i[0], result_list_i[1], result_list_i[2], result_list_i[3], result_list_i[4], result_list_i[5], max_strong_index]
     return res_list, num_list
 
 
@@ -155,11 +160,18 @@ def couples():
                 if row == row_m or cul == cul_m:
                     temp_num_list[row][cul] = 0
 
-    print(max_num_list)
-    print(max_index_list)
+    for item in ldb_list:
+        for num in item.six_num_arr:
+            if num in max_index_list:
+                st_num_list[item.x_num] += 1
+                break
+    max_strong_index1 = list(st_num_list).index(max(st_num_list))  # Getting strong num
+    st_num_list[max_strong_index1] = 0
+    max_strong_index2 = list(st_num_list).index(max(st_num_list))  # Getting strong num
+    max_index_list.append(max_strong_index1)
+    max_index_list.append(max_strong_index2)
 
-    res_list = [1, 2, 3, 4, 5, 6, 7]
-    return res_list, num_list
+    return max_index_list, num_list
 
 
 def wining_dates():
@@ -184,14 +196,17 @@ def chain_num():
     num_list_counter = np.zeros((38,), dtype=int)   # number of shows in a row
     many_list_chain = np.zeros((38,), dtype=int)
     num_list_max = np.zeros((38,), dtype=int)
-    st_num_list = np.zeros((8,), dtype=int)
+    st_num_counter = np.zeros((8,), dtype=int)
+    st_num_chain = np.zeros((8,), dtype=int)
+    st_num_max = np.zeros((8,), dtype=int)
 
     temp_six_arr = [ldb_list[0].six_num_arr[0], ldb_list[0].six_num_arr[1], ldb_list[0].six_num_arr[2],
                     ldb_list[0].six_num_arr[3], ldb_list[0].six_num_arr[4], ldb_list[0].six_num_arr[5]]
+    temp_x_num = ldb_list[0].x_num
     for item in ldb_list:
-        if item.lotto_num < 1841:
+        if item.lotto_num < 1841:                                           # Breaking point
             break
-        for temp in item.six_num_arr:
+        for temp in item.six_num_arr:                                       # 6 num chain
             num_list_counter[temp] += 1
             if num_list_counter[temp] == 3:
                 many_list_chain[temp] += 1
@@ -204,41 +219,59 @@ def chain_num():
         temp_six_arr = [item.six_num_arr[0], item.six_num_arr[1], item.six_num_arr[2],
                         item.six_num_arr[3], item.six_num_arr[4], item.six_num_arr[5]]
 
+        st_num_counter[item.x_num] += 1                                        # x_num chain
+        st_num_chain[item.x_num] += 1
+        if st_num_counter[item.x_num] > st_num_max[item.x_num]:
+            st_num_max[item.x_num] = st_num_counter[item.x_num]
+        if temp_x_num != item.x_num:
+            temp_x_num = item.x_num
+            st_num_counter[item.x_num] = 0
+
     # part2 - making result list
     num_list_counter = np.zeros((38,), dtype=int)
     for i in range(0, 38):
         num_list_counter[i] = num_list_max[i]*2 + many_list_chain[i]
-    print(num_list_counter)
+    for i in range(0, 8):
+        st_num_counter[i] = st_num_chain[i] + st_num_max[i] * 3
 
-    result_list = np.zeros((6,), dtype=int)
-    result_list_i = np.zeros((6,), dtype=int)
-
-    for i in range(0, 6):
+    result_list = np.zeros((12,), dtype=int)
+    result_list_i = np.zeros((12,), dtype=int)
+    for i in range(0, 12):
         result_list[i] = max(num_list_counter)
         result_list_i[i] = list(num_list_counter).index(result_list[i])
         num_list_counter[result_list_i[i]] = 0
 
-    for i in range(0, 6):
+    res_list = []
+    for i in range(0, 12):
         num_list_counter[result_list_i[i]] = result_list[i]
-
-    # Result
-    print(result_list_i)
-    print(num_list_counter)
-    # number of times the num show repeted in foing win
-    print(num_list_max)
-
+        res_list.append(result_list_i[i])
+    temp_x_num = list(st_num_counter).index(max(st_num_counter))
+    res_list.append(temp_x_num)
+    st_num_counter[temp_x_num] = 0
+    res_list.append(list(st_num_counter).index(max(st_num_counter)))
+    # print(res_list)
+    # print(num_list_max)
     # number of time the num were 3 time in a row
-    print(many_list_chain)
-    res_list = [1, 2, 3, 4, 5, 6, 7]
-    return res_list
+    # print(many_list_chain)
 
-def randomBySeed():
+    return res_list, num_list_counter
+
+def randomBySeed(vef_num_list):
     """
     download csv from loto website
     :return: List the 6 number & extra (7 numbers in total)
     """
-    print("ddd")
-    res_list = [1, 2, 3, 4, 5, 6, 7]
+    random_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
+                   28, 29, 30, 31, 32, 33, 34, 35, 36, 37] + vef_num_list
+    res_list = []
+    index = 0
+    while len(res_list) < 12:
+        index = np.random.choice(random_list)
+        res_list.append(index)
+        random_list = list(filter(lambda a: a != index, random_list))
+    res_list.append(np.random.choice([1, 2, 3, 4, 5, 6, 7]))
+    res_list.append(np.random.choice([1, 2, 3, 4, 5, 6, 7]))
+
     return res_list
 
 
@@ -247,8 +280,41 @@ def randomByStrongNum():
     download csv from loto website
     :return: List the 6 number & extra (7 numbers in total)
     """
-    print("ddd")
-    res_list = [1, 2, 3, 4, 5, 6, 7]
+    arr_st_num, num_list, st_num_list = strongNums()
+    temp_res_list1 = []
+    flag = 0
+    while flag != 37:
+        for i in range(0,38,1):
+            if num_list[i] > 0:
+                temp_res_list1.append(i)
+                num_list[i] -= 1
+                if num_list[i] == 0:
+                    flag+=1
+
+    flag = 0
+    temp_res_list2 = []
+    while flag != 7:
+        for i in range(0,8,1):
+            if st_num_list[i] > 0:
+                temp_res_list2.append(i)
+                st_num_list[i] -= 1
+                if st_num_list[i] == 0:
+                    flag+=1
+
+    res_list = []
+    # res_list = np.random.choice(num_list, size=(6))
+    index = 0
+    while len(res_list) < 12:
+        index = np.random.choice(temp_res_list1)
+        res_list.append(index)
+        temp_res_list1 = list(filter(lambda a: a != index, temp_res_list1))
+
+    index = np.random.choice(temp_res_list2)
+    res_list.append(index)
+    temp_res_list2 = list(filter(lambda a: a != index, temp_res_list2))
+    index = np.random.choice(temp_res_list2)
+    res_list.append(index)
+
     return res_list
 
 
@@ -390,8 +456,7 @@ def graphs(graph_num):
     gui, start menu
     :return: none
     """
-    h = np.random.normal(200000, 25000, 5000)
-    print(graph_num)
+    h = strongNums()
     plt.hist(h, 200)
     plt.show()
 
@@ -406,7 +471,23 @@ def graphs(graph_num):
 
 
 def start_button():
+    global function_counter                                                 # How many functions selected
     # popup("BillDa", "you have to be over 18 for buying lotto ticket")
+    submit_ldb()
+    if strongNums.get():
+        function_counter += 2
+    if numsOnlyWins.get():
+        function_counter += 2
+    if couples.get():
+        function_counter += 2
+    if chain_num.get():
+        function_counter += 2
+    if randomByStrongNum.get():
+        function_counter += 2
+    if randomNum.get():
+        function_counter += 2
+
+
     ticket_top()
 
 
@@ -439,7 +520,6 @@ def ticket_top():
     y2_start = 45
     btn_grph_list = []
     btn_win_list = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "A1", "A2", "As"]
-    function_counter = 14
     for row in range(0, function_counter):
         my_canvas.create_text(x1_start - 15, y1_start + 15 + (row * 40), fill="black", font=font, text=row + 1)
         for col in range(0, 6):
@@ -478,7 +558,22 @@ def gui():
     Main window (GUI), start menu
     :return: none
     """
+    global strongNums
+    global numsOnlyWins
+    global couples
+    global chain_num
+    global randomByStrongNum
+    global randomNum
+    global root
+
     result_list = []
+    root = Tk()                                                             # Configure main window
+    strongNums = IntVar()
+    couples = IntVar()
+    chain_num = IntVar()
+    numsOnlyWins = IntVar()
+    randomByStrongNum = IntVar()
+    randomNum = IntVar()
 
     root.minsize(500, 600)
     root.title("Lotto App")
@@ -489,10 +584,6 @@ def gui():
     small_font = ('Purisa', 11)
 
     # Configure start menu
-    strongNums = IntVar()
-    couples = IntVar()
-    chain_num = IntVar()
-    numsOnlyWins = IntVar()
     option_download = IntVar()
 
     Button(root, text="Start", command=start_button,
@@ -501,23 +592,26 @@ def gui():
 
     frame = LabelFrame(root, padx=5, pady=0, bg='#3E8E7E',)
     frame.pack(anchor=NW)
-    Label(frame, text="Functions to create lotto ticket                                        "       
+    Label(frame, text="Functions to create lotto ticket each one will create 2 rows            "       
                       "                                                                        ",
           bg='#3E8E7E').pack(anchor=NW)                                                 # Set the size of the frame
     Label(frame, text="", bg='#3E8E7E').pack()                                           # For space between things
-    Checkbutton(frame, text="Numbers with most appearance in lottery", variable=strongNums, onvalue=1, offvalue=0,
+    Checkbutton(frame, text="Numbers with most appearance in lottery", variable=strongNums, onvalue=True, offvalue=False,
                 bg='#3E8E7E', activebackground="#3E8E7E", font=frame_font).pack(anchor=NW)
     Checkbutton(frame, text="Numbers with most appearance in lottery (Only wining tickets)", variable=numsOnlyWins,
-                onvalue=1, offvalue=0, activebackground="#3E8E7E", bg='#3E8E7E', font=frame_font).pack(anchor=NW)
-    Checkbutton(frame, text="Two numbers with the most shows together", variable=couples, onvalue=1, offvalue=0,
+                onvalue=True, offvalue=False, activebackground="#3E8E7E", bg='#3E8E7E', font=frame_font).pack(anchor=NW)
+    Checkbutton(frame, text="Two numbers with the most shows together", variable=couples, onvalue=True, offvalue=False,
                 bg='#3E8E7E', activebackground="#3E8E7E", font=frame_font).pack(anchor=NW)
-    Checkbutton(frame, text="Numbers appearance in lottery sequence", variable=chain_num, onvalue=1, offvalue=0,
+    Checkbutton(frame, text="Numbers appearance in lottery sequence", variable=chain_num, onvalue=True, offvalue=False,
                 bg='#3E8E7E', activebackground="#3E8E7E", font=frame_font).pack(anchor=NW)
     Checkbutton(frame, text="Random built by numbers with most appearance", variable=randomByStrongNum,
-                onvalue=1, offvalue=0, bg='#3E8E7E', activebackground="#3E8E7E", font=frame_font).pack(anchor=NW)
+                onvalue=True, offvalue=False, bg='#3E8E7E', activebackground="#3E8E7E", font=frame_font).pack(anchor=NW)
     Checkbutton(frame, text="Random numbers, add favorite numbers", activebackground="#3E8E7E",
-                variable=randomByStrongNum, onvalue=1, offvalue=0, bg='#3E8E7E', font=frame_font).pack(anchor=NW)
+                variable=randomNum, onvalue=True, offvalue=False, bg='#3E8E7E', font=frame_font).pack(anchor=NW)
     # TODO: place to write numbers (box)
+    entry_number = Entry(frame)
+    entry_number.insert(0, "Enter numbers")
+    entry_number.pack(anchor=W)
     Label(frame, text="", bg='#3E8E7E').pack()                                          # For space between things
 
     Label(root, text="", bg='#3E8E7E').pack()                                           # For space between things
@@ -535,8 +629,8 @@ def main():
     Main
     :return: none
     """
-    # gui()
-    tests()
+    gui()
+    # tests()
     # submit()
     # submit_ldb()
 
@@ -544,6 +638,4 @@ def main():
 if __name__ == '__main__':          # Press the green button in the gutter to run the script.
     file_name = 'Lotto.csv'                                                 # The file containing lotto results
     ldb_list = []                                                           # list of the DB
-    function_counter = 0                                                    # How many functions selected
-    root = Tk()                                                             # Configure main window
     main()
