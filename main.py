@@ -3,29 +3,19 @@ from tkinter import *
 import requests
 from tkinter import messagebox
 import numpy as np
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 import sqlite3
 import ldb
 
 global file_name
 global ldb_list
 global res_lst_ticket
-
-global root
-global strongNums
-global couples
-global chain_num
-global numsOnlyWins
 function_counter = 0
 
 
 def tests():
     submit_ldb()
-    a = [5, 5]
-    randomBySeed(a)
-    graphs()
-
-    # wining_dates()
+    wining_dates()
 
     # counter = 0
     # winer_counter = 0
@@ -54,7 +44,7 @@ def tests():
 def strongNums():
     """
     function getting the best numbers
-    :return: List the 6 number & extra (7 numbers in total)
+    :return: List the 6 number & extra, list for graph 6_num, list for graph x_num.
     """
     # Part1 - making data list
     num_list = np.zeros((38,), dtype=int)
@@ -92,7 +82,7 @@ def strongNums():
 def strongNumsOnlyWins():
     """
     function getting the best numbers only from wins
-    :return: List the 6 number & extra (7 numbers in total)
+    :return: List the 6 number & extra, list for graph 6_num, list for graph x_num.
     """
     num_list = np.zeros((38,), dtype=int)
     st_num_list = np.zeros((8,), dtype=int)
@@ -122,13 +112,13 @@ def strongNumsOnlyWins():
     res_list.append(max_strong_index1)
     res_list.append(max_strong_index2)
 
-    return res_list, num_list
+    return res_list, num_list, st_num_list
 
 
 def couples():
     """
     function getting the best numbers only from wins
-    :return: List the 6 number & extra (7 numbers in total)
+    :return: List the 6 number & extra, 2D for graph, list for graph x_num.
     """
     num_list = np.zeros((38, 38), dtype=int)
     st_num_list = np.zeros((8,), dtype=int)
@@ -171,7 +161,7 @@ def couples():
     max_index_list.append(max_strong_index1)
     max_index_list.append(max_strong_index2)
 
-    return max_index_list, num_list
+    return max_index_list, num_list, st_num_list
 
 
 def wining_dates():
@@ -180,18 +170,24 @@ def wining_dates():
     :return: TODO: BILL wining_dates
     """
     wining_list = []
+    counter_list = []
+    counter_loses = 0
     # Add only wining from DB
     for item in ldb_list:
+        counter_loses += 1
         if item.win_num > 0 or item.dbwin_num > 0:
+            counter_list.append(counter_loses)
+            counter_loses = 0
             wining_list.append(item)
-
-    print(len(wining_list))
+            # print(item.date)
+    print(counter_list)
+    # print(len(wining_list))
 
 
 def chain_num():
     """
     download csv from lotto website
-    :return: List the 6 number & extra (7 numbers in total)
+    :return: List the 6 number & extra, list for graph 6_num.
     """
     num_list_counter = np.zeros((38,), dtype=int)   # number of shows in a row
     many_list_chain = np.zeros((38,), dtype=int)
@@ -255,6 +251,7 @@ def chain_num():
     # print(many_list_chain)
 
     return res_list, num_list_counter
+
 
 def randomBySeed(vef_num_list):
     """
@@ -340,6 +337,27 @@ def download_lotto_res():
         return flag
 
 
+def download_res_txt(ticket_list):
+    """
+    download csv from loto website
+    :return: Flag Bool, True if the file was download successful, False else.
+    """
+    flag = True
+    try:
+        f = open("Lotto_res.txt", 'w')
+        f.write("Lotto ticket results:\n")
+        for line in ticket_list:
+            f.write(str(line) + '\n')
+        f.write("Good luck :)")
+        f.close()
+
+    except:
+        flag = False
+        print("error making result file")
+    finally:
+        return flag
+
+
 # Database
 
 def submit_sql():
@@ -415,35 +433,43 @@ def submit_sql():
 def submit_ldb():
     """
     creating database from LDB
-    :return: none
+    :return: True if success
     """
-    #TODO add try 2 func
-    f = open(file_name, "rb")                                               # Open the csv file
-    f.readline()
-    count = 0
-    for a1 in f:
-        count += 1
-        lotto_num = int(a1.decode('ascii').rsplit(",")[0])                  # Lotto number
-        date = a1.decode('ascii').rsplit(",")[1]                            # Date
-        num1 = int(a1.decode('ascii').rsplit(",")[2])                       # First number
-        num2 = int(a1.decode('ascii').rsplit(",")[3])                       # Second number
-        num3 = int(a1.decode('ascii').rsplit(",")[4])                       # 3 number
-        num4 = int(a1.decode('ascii').rsplit(",")[5])                       # 4 number
-        num5 = int(a1.decode('ascii').rsplit(",")[6])                       # 5 number
-        num6 = int(a1.decode('ascii').rsplit(",")[7])                       # 6 number
-        strong = int(a1.decode('ascii').rsplit(",")[8])                     # Extra number
-        if lotto_num > 1465:                                                # From here the lotto changes
-            wins = int(a1.decode('ascii').rsplit(",")[9])                   # How many wins (Lotto)
-        else:
-            wins = -1
-        if lotto_num > 2233:                                                # Stop collecting data
-            dawns = int(a1.decode('ascii').rsplit(",")[10])                 # How many wins (Double-Lotto)
-        else:
-            break
-        ldb_list.append(ldb.LDB(lotto_num, date, (num1, num2, num3, num4, num5, num6),
-                                strong, wins, dawns))
+    flag = True
+    try:
+        f = open(file_name, "rb")                                           # Open the csv file
+        f.readline()
+        count = 0
+        for a1 in f:
+            count += 1
+            lotto_num = int(a1.decode('ascii').rsplit(",")[0])  # Lotto number
+            date = a1.decode('ascii').rsplit(",")[1]  # Date
+            num1 = int(a1.decode('ascii').rsplit(",")[2])  # First number
+            num2 = int(a1.decode('ascii').rsplit(",")[3])  # Second number
+            num3 = int(a1.decode('ascii').rsplit(",")[4])  # 3 number
+            num4 = int(a1.decode('ascii').rsplit(",")[5])  # 4 number
+            num5 = int(a1.decode('ascii').rsplit(",")[6])  # 5 number
+            num6 = int(a1.decode('ascii').rsplit(",")[7])  # 6 number
+            strong = int(a1.decode('ascii').rsplit(",")[8])  # Extra number
+            if lotto_num > 1465:  # From here the lotto changes
+                wins = int(a1.decode('ascii').rsplit(",")[9])  # How many wins (Lotto)
+            else:
+                wins = -1
+            if lotto_num > 2233:  # Stop collecting data
+                dawns = int(a1.decode('ascii').rsplit(",")[10])  # How many wins (Double-Lotto)
+            else:
+                break
+            ldb_list.append(ldb.LDB(lotto_num, date, (num1, num2, num3, num4, num5, num6),
+                                    strong, wins, dawns))
 
-    f.close()
+        f.close()
+
+    except:
+        flag = False
+        popup("ERROR", "Error in Lotto CSV file, try again")
+    finally:
+        return flag
+
 
 
 """
@@ -451,44 +477,90 @@ GUI Shit stuff
 """
 
 
-def graphs(graph_num):
+def graphs(graph_list):
     """
     gui, start menu
     :return: none
     """
-    h = strongNums()
-    plt.hist(h, 200)
+    numbers = range(0, 38)
+
+    plt.style.use('seaborn')
+
+    fig, ax = plt.subplots()
+    ax.plot(numbers, graph_list, label="function")
+    ax.legend()
+    ax.set_title("Graph")
+    ax.set_xlabel('numbers')
+    ax.set_ylabel('num of res')
+
+    plt.tight_layout()
     plt.show()
 
-    # print(num_list)
-    # print(st_num_list)
-    # x = range(0,38)
-    # plt.title("Line graph")
-    # plt.ylabel('Y axis')
-    # plt.xlabel('X axis')
-    # plt.plot(x, num_list, color="red")
-    # plt.show()
+
+def organize_res(res_list):
+    res1 = [res_list[0], res_list[1], res_list[2], res_list[3], res_list[4], res_list[5], res_list[12]]
+    res2 = [res_list[6], res_list[7], res_list[8], res_list[9], res_list[10], res_list[11], res_list[13]]
+    return res1, res2
 
 
 def start_button():
-    global function_counter                                                 # How many functions selected
-    # popup("BillDa", "you have to be over 18 for buying lotto ticket")
+    global function_counter
+
+    if download_lotto_res() != True:
+        popup("Can't download results, sorry")
+        root.quit()
+
+    # How many functions selected
+    popup("BillDa", "you have to be over 18 for buying lotto ticket")
+
     submit_ldb()
-    if strongNums.get():
+    ticket_list = []
+    graph_list = []
+    vef_num_list = []
+    if strongNums_v.get():
+        a1, six_graph, none = strongNums()
+        res1, res2 = organize_res(a1)
+        graph_list.append(six_graph)
+        ticket_list.append(res1)
+        ticket_list.append(res2)
         function_counter += 2
-    if numsOnlyWins.get():
+    if numsOnlyWins_v.get():
+        a1, six_graph, none = strongNumsOnlyWins()
+        res1, res2 = organize_res(a1)
+        graph_list.append(six_graph)
+        ticket_list.append(res1)
+        ticket_list.append(res2)
         function_counter += 2
-    if couples.get():
+    if couples_v.get():
+        a1, twod_six_graph, none = couples()
+        res1, res2 = organize_res(a1)
+        ticket_list.append(res1)
+        ticket_list.append(res2)
         function_counter += 2
-    if chain_num.get():
+    if chain_num_v.get():
+        a1, six_graph = chain_num()
+        res1, res2 = organize_res(a1)
+        graph_list.append(six_graph)
+        ticket_list.append(res1)
+        ticket_list.append(res2)
         function_counter += 2
-    if randomByStrongNum.get():
+    if randomByStrongNum_v.get():
+        a1 = randomByStrongNum()
+        res1, res2 = organize_res(a1)
+        ticket_list.append(res1)
+        ticket_list.append(res2)
         function_counter += 2
-    if randomNum.get():
+    if randomNum_v.get():
+        a1 = randomBySeed(vef_num_list)
+        res1, res2 = organize_res(a1)
+        ticket_list.append(res1)
+        ticket_list.append(res2)
         function_counter += 2
 
+    if option_download.get():
+        download_res_txt(ticket_list)
 
-    ticket_top()
+    ticket_top(ticket_list, graph_list)
 
 
 def optionClicked(value):
@@ -500,7 +572,7 @@ def popup(title, info):
     messagebox.showinfo(title, info)
 
 
-def ticket_top():
+def ticket_top(ticket_list, graph_list):
     """
     gui, start menu
     :return: none
@@ -510,47 +582,41 @@ def ticket_top():
     top1.config(bg='#146356')
     font = ('Purisa', 15, 'bold italic')                                    # Font for all
     Label(top1, text="", bg='#146356', fg="white").pack()
-    Label(top1, text="Hello and Good Luck!!!",bg='#146356',fg="white").pack()
+    Label(top1, text="Hello and Good Luck!!!", bg='#146356', fg="white").pack()
 
-    my_canvas = Canvas(top1, width=375, height=580, bg='#146356')           # Create the canvas for the ticket
-    my_canvas.create_rectangle(268, 0, 272, 580, fill="black")              # Rectangle that create a black line
+    my_canvas = Canvas(top1, width=375, height=500, bg='#146356')           # Create the canvas for the ticket
+    my_canvas.create_rectangle(268, 0, 272, 500, fill="black")              # Rectangle that create a black line
     x1_start = 30                                                           # Start point for oval (x1,y1,x2,y2)
     y1_start = 15
     x2_start = 60
     y2_start = 45
-    btn_grph_list = []
-    btn_win_list = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "A1", "A2", "As"]
+
     for row in range(0, function_counter):
         my_canvas.create_text(x1_start - 15, y1_start + 15 + (row * 40), fill="black", font=font, text=row + 1)
         for col in range(0, 6):
             my_canvas.create_oval(x1_start + (col * 40), y1_start + (row * 40), x2_start + (col * 40), y2_start + (row * 40), fill="#F90716")
-            my_canvas.create_text(x1_start + 15 + (col * 40), y1_start + 15, fill="black", font=font, text="33")
+            my_canvas.create_text(x1_start + 15 + (col * 40), y1_start + 15 + (row * 40), fill="black", font=font, text=ticket_list[row][col])
         # Strong number
         my_canvas.create_oval(250 + x1_start, y1_start + (row * 40), 250 + x2_start, y2_start + (row * 40), fill="red")
-        my_canvas.create_text(265 + x1_start, y1_start + 15 + (row * 40), fill="black", font=font, text="6")
-        # Graph button
-        # btn_grph_list.append(Button(my_canvas, text=btn_win_list[row], command=lambda: graphs(row)))
-        # btn_grph_list[row].configure(width=5, activebackground="green", relief=FLAT)
-        # # btn_win_list.append(my_canvas.create_window(320, y1_start + (row * 40), anchor=NW, window=btn_grph_list[row]))
-        # my_canvas.create_window(320, y1_start + (row * 40), anchor=NW, window=btn_grph_list[row])
+        my_canvas.create_text(265 + x1_start, y1_start + 15 + (row * 40), fill="black", font=font, text=ticket_list[row][col+1])
 
-    # coun = 0
-    # for btn in btn_grph_list:
-    #     my_canvas.create_window(320, y1_start + (coun * 40), anchor=NW, window=btn)
-    #     coun += 1
+    if (len(graph_list)>0):
+        button1 = Button(my_canvas, text="Graph", command=lambda: graphs(graph_list[0]), anchor=W)
+        button1.configure(width=5, activebackground="#33B5E5", relief=FLAT)
+        my_canvas.create_window(320, 15, anchor=NW, window=button1)
 
-    button1 = Button(my_canvas, text="A", command=lambda: graphs(0), anchor=W)
-    button1.configure(width=5, activebackground="#33B5E5", relief=FLAT)
+    if (len(graph_list) > 1):
+        button2 = Button(my_canvas, text="Graph", command=lambda: graphs(graph_list[1]), anchor=W)
+        button2.configure(width=5, activebackground="#33B5E5", relief=FLAT)
+        my_canvas.create_window(320, 95, anchor=NW, window=button2)
 
-    button2 = Button(my_canvas, text="B", command=lambda: graphs(1), anchor=W)
-    button2.configure(width=5, activebackground="#33B5E5", relief=FLAT)
-
-    my_canvas.create_window(320, 15, anchor=NW, window=button1)
-    my_canvas.create_window(320, 55, anchor=NW, window=button2)
+    if (len(graph_list) > 2):
+        button3 = Button(my_canvas, text="Graph", command=lambda: graphs(graph_list[2]), anchor=W)
+        button3.configure(width=5, activebackground="#33B5E5", relief=FLAT)
+        my_canvas.create_window(320, 175, anchor=NW, window=button3)
 
     my_canvas.pack(padx=5, pady=5)
     Button(top1, text="End", command=root.quit, fg="black", bg='#7CD1B8').pack()
-
 
 
 def gui():
@@ -558,24 +624,26 @@ def gui():
     Main window (GUI), start menu
     :return: none
     """
-    global strongNums
-    global numsOnlyWins
-    global couples
-    global chain_num
-    global randomByStrongNum
-    global randomNum
     global root
-
+    global strongNums_v
+    global numsOnlyWins_v
+    global couples_v
+    global chain_num_v
+    global randomByStrongNum_v
+    global randomNum_v
+    global option_download
     result_list = []
-    root = Tk()                                                             # Configure main window
-    strongNums = IntVar()
-    couples = IntVar()
-    chain_num = IntVar()
-    numsOnlyWins = IntVar()
-    randomByStrongNum = IntVar()
-    randomNum = IntVar()
 
-    root.minsize(500, 600)
+    root = Tk()
+    # Configure main window
+    strongNums_v = IntVar()
+    couples_v = IntVar()
+    chain_num_v = IntVar()
+    numsOnlyWins_v = IntVar()
+    randomByStrongNum_v = IntVar()
+    randomNum_v = IntVar()
+
+    root.minsize(350, 550)
     root.title("Lotto App")
     root.config(bg='#3E8E7E')
     Label(root, text="", bg='#3E8E7E').pack()                                           # For space between things
@@ -592,31 +660,28 @@ def gui():
 
     frame = LabelFrame(root, padx=5, pady=0, bg='#3E8E7E',)
     frame.pack(anchor=NW)
-    Label(frame, text="Functions to create lotto ticket each one will create 2 rows            "       
-                      "                                                                        ",
+    Label(frame, text="Functions to create lotto ticket each 1 will create 2 rows"       
+                      "                                                          ",
           bg='#3E8E7E').pack(anchor=NW)                                                 # Set the size of the frame
     Label(frame, text="", bg='#3E8E7E').pack()                                           # For space between things
-    Checkbutton(frame, text="Numbers with most appearance in lottery", variable=strongNums, onvalue=True, offvalue=False,
+    Checkbutton(frame, text="Numbers with most appearance in lottery", variable=strongNums_v, onvalue=True, offvalue=False,
                 bg='#3E8E7E', activebackground="#3E8E7E", font=frame_font).pack(anchor=NW)
-    Checkbutton(frame, text="Numbers with most appearance in lottery (Only wining tickets)", variable=numsOnlyWins,
+    Checkbutton(frame, text="Numbers with most appearance in lottery (Only wining tickets)", variable=numsOnlyWins_v,
                 onvalue=True, offvalue=False, activebackground="#3E8E7E", bg='#3E8E7E', font=frame_font).pack(anchor=NW)
-    Checkbutton(frame, text="Two numbers with the most shows together", variable=couples, onvalue=True, offvalue=False,
+    Checkbutton(frame, text="Two numbers with the most shows together", variable=couples_v, onvalue=True, offvalue=False,
                 bg='#3E8E7E', activebackground="#3E8E7E", font=frame_font).pack(anchor=NW)
-    Checkbutton(frame, text="Numbers appearance in lottery sequence", variable=chain_num, onvalue=True, offvalue=False,
+    Checkbutton(frame, text="Numbers appearance in lottery sequence", variable=chain_num_v, onvalue=True, offvalue=False,
                 bg='#3E8E7E', activebackground="#3E8E7E", font=frame_font).pack(anchor=NW)
-    Checkbutton(frame, text="Random built by numbers with most appearance", variable=randomByStrongNum,
+    Checkbutton(frame, text="Random built by numbers with most appearance", variable=randomByStrongNum_v,
                 onvalue=True, offvalue=False, bg='#3E8E7E', activebackground="#3E8E7E", font=frame_font).pack(anchor=NW)
-    Checkbutton(frame, text="Random numbers, add favorite numbers", activebackground="#3E8E7E",
-                variable=randomNum, onvalue=True, offvalue=False, bg='#3E8E7E', font=frame_font).pack(anchor=NW)
-    # TODO: place to write numbers (box)
-    entry_number = Entry(frame)
-    entry_number.insert(0, "Enter numbers")
-    entry_number.pack(anchor=W)
+    Checkbutton(frame, text="Random numbers", activebackground="#3E8E7E",
+                variable=randomNum_v, onvalue=True, offvalue=False, bg='#3E8E7E', font=frame_font).pack(anchor=NW)
+
     Label(frame, text="", bg='#3E8E7E').pack()                                          # For space between things
 
     Label(root, text="", bg='#3E8E7E').pack()                                           # For space between things
-    Checkbutton(root, text="Download your ticket as text file", variable=option_download, onvalue=1,
-                offvalue=0, activebackground="#3E8E7E", bg='#3E8E7E', font=small_font).pack(anchor=W)
+    Checkbutton(root, text="Download your ticket as text file", variable=option_download, onvalue=True,
+                offvalue=False, activebackground="#3E8E7E", bg='#3E8E7E', font=small_font).pack(anchor=W)
     Label(root, text="", bg='#3E8E7E').pack()                                           # For space between things
     Button(root, text="End", command=root.quit, fg="black",
            bg='#7CD1B8', font=big_font).pack(anchor=S)                                  # End button, quit App
@@ -629,6 +694,7 @@ def main():
     Main
     :return: none
     """
+
     gui()
     # tests()
     # submit()
