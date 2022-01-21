@@ -1,3 +1,7 @@
+"""
+* Copyright (c) BillDa
+* https://www.youtube.com/channel/UCsmrG8l2cZIa6EeJJEqrFQA
+"""
 import datetime
 from tkinter import *
 import requests
@@ -14,37 +18,76 @@ function_counter = 0
 
 
 def tests():
+    """
+    function to test the other function.
+    It build the database, and check functions.
+    :return: List the 6 number & extra, list for graph 6_num, list for graph x_num.
+    """
+    # Before use the test need to download the csv file (download_lotto_res)
     submit_ldb()
-    wining_dates()
+    #strong_nums()
+    #wining_dates()
 
-    # counter = 0
-    # winer_counter = 0
-    # for temp1 in ldb_list:
-    #     if temp1.lotto_num < 1841:
-    #         break
-    #     for temp2 in ldb_list:
-    #         if temp2.lotto_num < 1841:
-    #             break
-    #         if temp1.lotto_num != temp2.lotto_num:
-    #             if temp1.six_num_arr[0] == temp2.six_num_arr[0]:
-    #                 if temp1.six_num_arr[1] == temp2.six_num_arr[1]:
-    #                     if temp1.six_num_arr[2] == temp2.six_num_arr[2]:
-    #                         if temp1.six_num_arr[3] == temp2.six_num_arr[3]:
-    #                             counter += 1
-    #                             if temp1.six_num_arr[4] == temp2.six_num_arr[4]:
-    #                                 print("Bill")
-    #                                 if temp1.six_num_arr[5] == temp2.six_num_arr[5]:
-    #                                     counter += 1
-    #                                     if temp1.win_num > 0 or temp1.dbwin_num > 0:
-    #                                         winer_counter += 1
-    # print(counter)
-    # print(winer_counter)
+    search_numbers = [[8,11,12,20,25,26],[37,29,28,13,6,1],[26,23,11,10,7,3]]
+    # Checks if a given number (search_numbers) won before
+    for list_six in search_numbers:
+        a = set(list_six)
+        for temp1 in ldb_list:
+            if temp1.lotto_num < 1841:
+                break
+            b = set(temp1.six_num_arr)
+            if a.issubset(b):
+                temp1.print_ldb()
+
+    counter = 0
+    # Check for the same numbers in different lotto_num
+    for temp1 in ldb_list:
+        if temp1.lotto_num < 1841:
+            break
+        for temp2 in ldb_list:
+            if temp2.lotto_num < 1841:
+                break
+            if temp1.lotto_num != temp2.lotto_num:
+                if temp1.six_num_arr[0] == temp2.six_num_arr[0]:
+                    if temp1.six_num_arr[1] == temp2.six_num_arr[1]:
+                        if temp1.six_num_arr[2] == temp2.six_num_arr[2]:
+                            if temp1.six_num_arr[3] == temp2.six_num_arr[3]:
+                                if temp1.six_num_arr[4] == temp2.six_num_arr[4]:
+                                    counter += 1
+                                    temp1.print_ldb()
+                                    temp2.print_ldb()
+                                    if temp1.six_num_arr[5] == temp2.six_num_arr[5]:
+                                        print("Same Numbers !!!!")
+                                        temp1.print_ldb()
+                                        temp2.print_ldb()
+
+    print(counter)
 
 
-def strongNums():
+def wining_dates():
+    """
+    function getting the best date to fill ticket
+    :return: TODO: BILL wining_dates
+    """
+    wining_list = []
+    counter_list = []
+    counter_loses = 0
+    # Add only wining from DB
+    for item in ldb_list:
+        counter_loses += 1
+        if item.win_num > 0 or item.dbwin_num > 0:
+            counter_list.append(counter_loses)
+            counter_loses = 0
+            wining_list.append(item)
+            # print(item.date)
+    print(counter_list)
+    # print(len(wining_list))
+
+
+def strong_nums():
     """
     function getting the best numbers
-    :return: List the 6 number & extra, list for graph 6_num, list for graph x_num.
+    :return: Lists the 12 number & 2 extras, list for graph 6_num, list for graph x_num.
     """
     # Part1 - making data list
     num_list = np.zeros((38,), dtype=int)
@@ -79,11 +122,12 @@ def strongNums():
     return res_list, num_list, st_num_list
 
 
-def strongNumsOnlyWins():
+def strong_numsO_only_wins():
     """
     function getting the best numbers only from wins
-    :return: List the 6 number & extra, list for graph 6_num, list for graph x_num.
+    :return: Lists the 12 number & 2 extras, list for graph 6_num, list for graph x_num.
     """
+    # Create 1D array of Appearances of numbers & extras from DBL.
     num_list = np.zeros((38,), dtype=int)
     st_num_list = np.zeros((8,), dtype=int)
     for item in ldb_list:
@@ -117,9 +161,10 @@ def strongNumsOnlyWins():
 
 def couples():
     """
-    function getting the best numbers only from wins
-    :return: List the 6 number & extra, 2D for graph, list for graph x_num.
+    Function getting the best 2 number Appearances tougher in lotto results.
+    :return: Lists the 12 number & 2 extras, 2D for graph, list for graph x_num.
     """
+    # Create 2D array Appearances of numbers from DBL.
     num_list = np.zeros((38, 38), dtype=int)
     st_num_list = np.zeros((8,), dtype=int)
     for item in ldb_list:
@@ -128,6 +173,7 @@ def couples():
                 if a != b:
                     num_list[int(a)][int(b)] += 1
 
+    # Look for 2 number Appearances in 2D arr.
     temp_num_list = num_list.copy()
     max_num_list = []
     max_index_list = []
@@ -164,30 +210,10 @@ def couples():
     return max_index_list, num_list, st_num_list
 
 
-def wining_dates():
-    """
-    function getting the best date to fill ticket
-    :return: TODO: BILL wining_dates
-    """
-    wining_list = []
-    counter_list = []
-    counter_loses = 0
-    # Add only wining from DB
-    for item in ldb_list:
-        counter_loses += 1
-        if item.win_num > 0 or item.dbwin_num > 0:
-            counter_list.append(counter_loses)
-            counter_loses = 0
-            wining_list.append(item)
-            # print(item.date)
-    print(counter_list)
-    # print(len(wining_list))
-
-
 def chain_num():
     """
-    download csv from lotto website
-    :return: List the 6 number & extra, list for graph 6_num.
+    Function gives the best continuons numbers from the DBL.
+    :return: Lists the 12 number & 2 extras, list for graph 6_num.
     """
     num_list_counter = np.zeros((38,), dtype=int)   # number of shows in a row
     many_list_chain = np.zeros((38,), dtype=int)
@@ -232,7 +258,7 @@ def chain_num():
 
     result_list = np.zeros((12,), dtype=int)
     result_list_i = np.zeros((12,), dtype=int)
-    for i in range(0, 12):
+    for i in range(0, 12):                                                  # get the number with max appearances
         result_list[i] = max(num_list_counter)
         result_list_i[i] = list(num_list_counter).index(result_list[i])
         num_list_counter[result_list_i[i]] = 0
@@ -253,10 +279,11 @@ def chain_num():
     return res_list, num_list_counter
 
 
-def randomBySeed(vef_num_list):
+def random_by_seed(vef_num_list):
     """
-    download csv from loto website
-    :return: List the 6 number & extra (7 numbers in total)
+    Generate random numbers
+    List of "favorite number", to give them more chance.
+    :return: Lists the 12 number & 2 extras (2x7 numbers in total)
     """
     random_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
                    28, 29, 30, 31, 32, 33, 34, 35, 36, 37] + vef_num_list
@@ -272,12 +299,12 @@ def randomBySeed(vef_num_list):
     return res_list
 
 
-def randomByStrongNum():
+def random_by_strong_num():
     """
     download csv from loto website
     :return: List the 6 number & extra (7 numbers in total)
     """
-    arr_st_num, num_list, st_num_list = strongNums()
+    arr_st_num, num_list, st_num_list = strong_nums()
     temp_res_list1 = []
     flag = 0
     while flag != 37:
@@ -463,13 +490,11 @@ def submit_ldb():
                                     strong, wins, dawns))
 
         f.close()
-
     except:
         flag = False
         popup("ERROR", "Error in Lotto CSV file, try again")
     finally:
         return flag
-
 
 
 """
@@ -498,12 +523,26 @@ def graphs(graph_list):
 
 
 def organize_res(res_list):
-    res1 = [res_list[0], res_list[1], res_list[2], res_list[3], res_list[4], res_list[5], res_list[12]]
-    res2 = [res_list[6], res_list[7], res_list[8], res_list[9], res_list[10], res_list[11], res_list[13]]
+    """
+    Get a list of 14 number and organize them to 2 list of 6 num and exrta
+    :return: 2 list of 6 num and exrta
+    """
+    res1 = [res_list[0], res_list[1], res_list[2], res_list[3], res_list[4], res_list[5]]
+    res1.sort()
+    res1.append(res_list[12])
+    res2 = [res_list[6], res_list[7], res_list[8], res_list[9], res_list[10], res_list[11]]
+    res2.sort()
+    res2.append(res_list[13])
     return res1, res2
 
 
 def start_button():
+    """
+    1) call download_lotto_res to download csv fill of all the results.
+    2) create data base of the relevant results from the file (use DBL or sql lite).
+    3) fill the list and call the gui for the ticket window.
+    :return: none
+    """
     global function_counter
 
     if download_lotto_res() != True:
@@ -514,29 +553,33 @@ def start_button():
     popup("BillDa", "you have to be over 18 for buying lotto ticket")
 
     submit_ldb()
-    ticket_list = []
+    ticket_list = []                                                        # Number for top_ticket to present
     graph_list = []
     vef_num_list = []
+    # if checks button is checked, we activate strong_nums
     if strongNums_v.get():
-        a1, six_graph, none = strongNums()
+        a1, six_graph, none = strong_nums()
         res1, res2 = organize_res(a1)
         graph_list.append(six_graph)
         ticket_list.append(res1)
         ticket_list.append(res2)
         function_counter += 2
+    # if checks button is checked, we activate strong_numsO_only_wins
     if numsOnlyWins_v.get():
-        a1, six_graph, none = strongNumsOnlyWins()
+        a1, six_graph, none = strong_numsO_only_wins()
         res1, res2 = organize_res(a1)
         graph_list.append(six_graph)
         ticket_list.append(res1)
         ticket_list.append(res2)
         function_counter += 2
+    # if checks button is checked, we activate couples
     if couples_v.get():
         a1, twod_six_graph, none = couples()
         res1, res2 = organize_res(a1)
         ticket_list.append(res1)
         ticket_list.append(res2)
         function_counter += 2
+    # if checks button is checked, we activate chain_num
     if chain_num_v.get():
         a1, six_graph = chain_num()
         res1, res2 = organize_res(a1)
@@ -544,37 +587,47 @@ def start_button():
         ticket_list.append(res1)
         ticket_list.append(res2)
         function_counter += 2
+    # if checks button is checked, we activate random_by_strong_num
     if randomByStrongNum_v.get():
-        a1 = randomByStrongNum()
+        a1 = random_by_strong_num()
         res1, res2 = organize_res(a1)
         ticket_list.append(res1)
         ticket_list.append(res2)
         function_counter += 2
+    # if checks button is checked, we activate random_by_seed
     if randomNum_v.get():
-        a1 = randomBySeed(vef_num_list)
+        a1 = random_by_seed(vef_num_list)
         res1, res2 = organize_res(a1)
         ticket_list.append(res1)
         ticket_list.append(res2)
         function_counter += 2
 
+    # for create text file of the results
     if option_download.get():
         download_res_txt(ticket_list)
-
+    # graphic the results
     ticket_top(ticket_list, graph_list)
 
 
-def optionClicked(value):
+def option_clicked(value):
     myLabel = Label(root, text=value).grid(row=15, column=0)
 
 
-# messagebox options: showinfo, showwarning, showerror, askquestion, askokcancel, askyesno
 def popup(title, info):
+    """
+    messagebox options: showinfo, showwarning, showerror, askquestion, askokcancel, askyesno
+    popup a window with info on it.
+    string - title,info
+    :return: none
+    """
     messagebox.showinfo(title, info)
 
 
 def ticket_top(ticket_list, graph_list):
     """
-    gui, start menu
+    gui, ticket window, fill a lotto ticket form ticket_list.
+    list ticket_list - the numbers to fill for the ticket.
+    list graph_list - the data of the functions , to create graph.
     :return: none
     """
     top1 = Toplevel()
@@ -586,11 +639,13 @@ def ticket_top(ticket_list, graph_list):
 
     my_canvas = Canvas(top1, width=375, height=500, bg='#146356')           # Create the canvas for the ticket
     my_canvas.create_rectangle(268, 0, 272, 500, fill="black")              # Rectangle that create a black line
-    x1_start = 30                                                           # Start point for oval (x1,y1,x2,y2)
+    # Start point for the first oval (x1,y1,x2,y2)
+    x1_start = 30
     y1_start = 15
     x2_start = 60
     y2_start = 45
 
+    # Create a graphic lotto ticket
     for row in range(0, function_counter):
         my_canvas.create_text(x1_start - 15, y1_start + 15 + (row * 40), fill="black", font=font, text=row + 1)
         for col in range(0, 6):
@@ -600,6 +655,7 @@ def ticket_top(ticket_list, graph_list):
         my_canvas.create_oval(250 + x1_start, y1_start + (row * 40), 250 + x2_start, y2_start + (row * 40), fill="red")
         my_canvas.create_text(265 + x1_start, y1_start + 15 + (row * 40), fill="black", font=font, text=ticket_list[row][col+1])
 
+    # Create a buttons for graphs
     if (len(graph_list)>0):
         button1 = Button(my_canvas, text="Graph", command=lambda: graphs(graph_list[0]), anchor=W)
         button1.configure(width=5, activebackground="#33B5E5", relief=FLAT)
@@ -634,15 +690,9 @@ def gui():
     global option_download
     result_list = []
 
-    root = Tk()
-    # Configure main window
-    strongNums_v = IntVar()
-    couples_v = IntVar()
-    chain_num_v = IntVar()
-    numsOnlyWins_v = IntVar()
-    randomByStrongNum_v = IntVar()
-    randomNum_v = IntVar()
 
+    # Configure main window
+    root = Tk()
     root.minsize(350, 550)
     root.title("Lotto App")
     root.config(bg='#3E8E7E')
@@ -653,6 +703,12 @@ def gui():
 
     # Configure start menu
     option_download = IntVar()
+    strongNums_v = IntVar()
+    couples_v = IntVar()
+    chain_num_v = IntVar()
+    numsOnlyWins_v = IntVar()
+    randomByStrongNum_v = IntVar()
+    randomNum_v = IntVar()
 
     Button(root, text="Start", command=start_button,
            fg='#041C32', bg='#7CD1B8', font=big_font).pack(anchor=N)                    # Start button, create ticket
@@ -694,14 +750,11 @@ def main():
     Main
     :return: none
     """
-
     gui()
     # tests()
-    # submit()
-    # submit_ldb()
 
 
-if __name__ == '__main__':          # Press the green button in the gutter to run the script.
+if __name__ == '__main__':                              # Press the green button in the gutter to run the script.
     file_name = 'Lotto.csv'                                                 # The file containing lotto results
     ldb_list = []                                                           # list of the DB
     main()

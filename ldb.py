@@ -1,3 +1,7 @@
+"""
+* Copyright (c) BillDa
+* https://www.youtube.com/channel/UCsmrG8l2cZIa6EeJJEqrFQA
+"""
 from datetime import datetime
 
 """
@@ -34,7 +38,7 @@ class LDB:
         return self.res_count > 0
 
     def print_ldb(self):
-        print(self.date, self.six_num_arr,self.x_num,self.win_num,self.dbwin_num)
+        print(self.date, self.six_num_arr, self.x_num, self.win_num, self.dbwin_num)
 
 def srt_to_date (str_date):
 
